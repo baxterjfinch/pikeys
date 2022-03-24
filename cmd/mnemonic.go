@@ -19,8 +19,8 @@ var versionCmd = &cobra.Command{
 	Long:  `Creates A New Mnemonic And Stores it In ~/mnemonics`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("\n Generating and Saving A New Mnemonic\n")
-		_, err := mnemonic.CreateNew()
-		store.StoreMnemonic()
+		newMnemonic, err := mnemonic.CreateNew()
+		store.StoreMnemonic(newMnemonic)
 		if err != nil {
 			log.Fatal(err)
 		}

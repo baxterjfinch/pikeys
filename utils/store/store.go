@@ -1,39 +1,55 @@
 package store
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"time"
+	"pikeys/internal/mnemonic"
 )
 
-func StoreMnemonic() {
+func StoreMnemonic(newMnemonic *mnemonic.PiKeysService) {
 	dirname, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	newpath := filepath.Join(dirname, "mnemonics")
-	log.Printf(newpath)
-	sec := time.Now().Unix()
-	filename := fmt.Sprintf("/mnemonic_%d", sec)
+	newpath := filepath.Join(dirname, "pikey")
+	filename := "/mnemonics.csv"
 	filePath, _ := filepath.Abs(newpath + filename)
-	log.Printf(filePath)
-
 	_, err = os.Stat(filename)
 
-	if os.IsNotExist(err) {
-		file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
-		if err != nil {
-			fmt.Printf("ERR: %s", err)
-			return
-		}
-		defer file.Close()
-	} else {
-		fmt.Println("File already exists!", filename)
+	readfile, err := os.OpenFile(filePath, os.O_RDONLY|os.O_CREATE, 0666)
+	if err != nil {
+		log.Println(err)
 		return
 	}
+	defer readfile.Close()
 
-	fmt.Println("File created successfully", filename)
+	readdata, err := csv.NewReader(readfile).ReadAll()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	rowCount := len(readdata)
+
+	writefile, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer writefile.Close()
+
+	w := csv.NewWriter(writefile)
+	defer w.Flush()
+	count := fmt.Sprintf("%d", rowCount)
+	mn := fmt.Sprintf("%s", newMnemonic.Mnemonic)
+
+	row := []string{count, mn}
+	if err := w.Write(row); err != nil {
+		log.Fatalln("error writing record to file", err)
+	}
+
+	fmt.Println("File updated successfully", filename)
 }
