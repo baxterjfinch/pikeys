@@ -5,15 +5,17 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	"pikeys/internal/details"
 	"pikeys/internal/mnemonic"
 	"pikeys/utils/store"
 )
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(createCmd)
+	rootCmd.AddCommand(detailsCmd)
 }
 
-var versionCmd = &cobra.Command{
+var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Creates A New Mnemonic",
 	Long:  `Creates A New Mnemonic And Stores it In ~/mnemonics`,
@@ -24,5 +26,14 @@ var versionCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+	},
+}
+
+var detailsCmd = &cobra.Command{
+	Use:   "details",
+	Short: "Provides Details of Mnemonics",
+	Long:  `Type In Your Mnemonic and the number of keypairs you want to view`,
+	Run: func(cmd *cobra.Command, args []string) {
+		details.GetDetails()
 	},
 }
